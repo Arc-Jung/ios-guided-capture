@@ -31,7 +31,7 @@ class AppDataModel: ObservableObject, Identifiable {
         }
     }
 
-    static let minNumImages = 10
+    static let minNumImages = 1
 
     static let bundleForLocalizedStrings = { return Bundle.main }()
 
