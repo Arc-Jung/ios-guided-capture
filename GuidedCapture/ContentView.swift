@@ -19,6 +19,10 @@ struct ContentView: View {
     
     @State private var showReconstructionView: Bool = false
     @State private var showErrorAlert: Bool = false
+    @State private var showStartView: Bool = false
+    @State private var showCompleteView: Bool = false
+    @State private var startTime: Date?
+    @State private var endTime: Date?
     private var showProgressView: Bool {
         appModel.state == .completed || appModel.state == .restart || appModel.state == .ready
     }
@@ -40,11 +44,45 @@ struct ContentView: View {
             } else {
                 showErrorAlert = false
                 showReconstructionView = newState == .reconstructing || newState == .viewing
+                if newState == .reconstructing {
+                    showStartView = true
+                }
+            }
+        }
+        .sheet(isPresented: $showStartView) {
+            VStack {
+                Text("Start Processing")
+                    .font(.title)
+                    .padding()
+                Button("OK") {
+                    startTime = Date()
+                    showStartView = false
+                }
+                .padding()
             }
         }
         .sheet(isPresented: $showReconstructionView) {
             if let folderManager = appModel.scanFolderManager {
                 ReconstructionPrimaryView(outputFile: folderManager.modelsFolder.appendingPathComponent("model-mobile.usdz"))
+                    .onAppear {
+                        showCompleteView = true
+                    }
+            }
+        }
+        .sheet(isPresented: $showCompleteView) {
+            VStack {
+                Text("Completed")
+                    .font(.title)
+                    .padding()
+                if let startTime = startTime {
+                    let duration = Date().timeIntervalSince(startTime)
+                    Text("Time taken: \(duration) seconds")
+                        .padding()
+                }
+                Button("OK") {
+                    showCompleteView = false
+                }
+                .padding()
             }
         }
         .alert(
